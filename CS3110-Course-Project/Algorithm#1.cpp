@@ -2,27 +2,27 @@
 
 Reminders:
 
-Keep in mind that it's nearly impossible/rare to create an original unque algorithm from the ground up as most or all 
-algorithms are evolutions, adaptions, derivations of exsisting algroithms with their own twist based on the problem 
-said algorithm is solving. The twist itsell doesnt have to be exlusive or extreme, it can be as simple as creating 
-a difference in how you traverse a list etc. 
-Rather, the focus of this assignment is to: 
+Keep in mind that it's nearly impossible/rare to create an original unque algorithm from the ground up as most or all
+algorithms are evolutions, adaptions, derivations of exsisting algroithms with their own twist based on the problem
+said algorithm is solving. The twist itsell doesnt have to be exlusive or extreme, it can be as simple as creating
+a difference in how you traverse a list etc.
+Rather, the focus of this assignment is to:
 
-For this project, we will create two algorithms that are different in regards to the following. This file is Algorithm#1: 
- - Order of growth 
+For this project, we will create two algorithms that are different in regards to the following. This file is Algorithm#1:
+ - Order of growth
  -  Number of basic operations executed
- - What strategy this algorithm follows or is derived by 
+ - What strategy this algorithm follows or is derived by
 
 Algorithm#1 below follows this strategy and the inspiration behind the algorithm derived by said : Transform and Conquer - Heapsort
 Rather than reducing the given problem into a single smaller instance of the orignal problem or several subproblems and then combining the
-solution of said sub problems to solve the original problem, we do a two stage process: Transform the problem intoa different form and then 
+solution of said sub problems to solve the original problem, we do a two stage process: Transform the problem intoa different form and then
 we conquer the original problem by solving the altered problem
 
 */
 
 
 #include <iostream> //for basic I/O
-#include <fstream> //for basic/fundemtnal (MUST) of creating, writing, and reading files. 
+#include <fstream> //for basic/fundemtnal (MUST) of creating, writing, and reading files.
 #include <sstream> //for istringstream object  to use iss(value) method from said object to read a specific word from a line within in a fil. This relies on getline(x,y) so it can break the word down within the line.
 #include <vector> //to use vectors
 #include <string> //so I can use certain built in methods for strings like getting the size
@@ -47,15 +47,16 @@ struct CreateNode{  //this struct is used as a simple linked list to store our i
         Start = start;
         End = end;
         Value = Val;
-        LinkNext = NULL; 
+        LinkNext = NULL;
      }
     
 };
 
+
 struct ModifyPlacementNode{ //this heap is used for stage 2 and to allow us to make it possible to traverse a heap from left right etc
 /*
 
-this struct looks at every node form the linked list of nodes within CreateNode and creeates a heap node for each node from said linked list. 
+this struct looks at every node form the linked list of nodes within CreateNode and creeates a heap node for each node from said linked list.
 You might ask, what is a heap node? A heap node must have the following three links: left, right, and parent. This is because a heap is a complete binary tree and thus every node can have up to two children and one parent.
 
 */
@@ -78,6 +79,8 @@ You might ask, what is a heap node? A heap node must have the following three li
     }
 
 };
+
+
 
 void AddToLinkedList(CreateNode*& Head, char start, char end, int Val); //this method is used to add a node to a linked list by using the tools from the first struct
 
@@ -112,7 +115,7 @@ int main(){
     while(getline(File, Text)){
         if(iterator == 1){
             iterator++;
-            continue;  
+            continue;
         }
         
         // get rid of commas
@@ -216,7 +219,7 @@ int main(){
     return 0;
 }
 
-void AddToLinkedList(CreateNode*& head, char start, char end, int Val){ //this method is used to add a node to a linked list by using the tools from the first struct only. 
+void AddToLinkedList(CreateNode*& head, char start, char end, int Val){ //this method is used to add a node to a linked list by using the tools from the first struct only.
     CreateNode* NewNode = new CreateNode(start, end, Val); //create a node by creating a pointer to the struct and invoke the paramterized constructor by passing respective argument
 
     if(head==NULL){ //if head node doesnt exsist
@@ -228,7 +231,7 @@ void AddToLinkedList(CreateNode*& head, char start, char end, int Val){ //this m
     while(CurrNode->LinkNext!=NULL){ //currnode access it's link (memroy address of the node we point to)
         CurrNode = CurrNode->LinkNext; //currnode is now initalized to the next node
     }
-    //the moment we leave the while loop, currnode is now at the very last node. 
+    //the moment we leave the while loop, currnode is now at the very last node.
     CurrNode->LinkNext = NewNode; //the moment were at the tail of the linked list (which is when the last node has a null link) we can modify the link of it to point to the new node we created. This new node is the lastest/last node of the linked list
 
 }
@@ -269,27 +272,29 @@ vector<ModifyPlacementNode*> HeapTreeFromLinkedList(CreateNode* Head){ //as the 
 }
 
 void Heapify(vector<ModifyPlacementNode*>& Nodes, int n, int i){ //this method is used to heapify the tree by ensuring that the definition of a heap is followed. This is used in both stage 1 and stage 2
-    int smallest = i;  //changed from largest to smallest since we're sorting ascending by End letter
+    int largest = i;  //changed from smallest to largest since we're sorting ascending by End letter
     int LeftIndex = 2 * i + 1;
     int RightIndex = 2 * i + 2;
 
     //compare by End letter (A to Z) instead of Value
-    if(LeftIndex < n && Nodes[LeftIndex]->End < Nodes[smallest]->End){
-        smallest = LeftIndex;
+    //if(LeftIndex < n && Nodes[LeftIndex]->End < Nodes[smallest]->End){
+    if(LeftIndex < n && Nodes[LeftIndex]->End > Nodes[largest]->End){
+        largest = LeftIndex;
     }
 
-    if(RightIndex < n && Nodes[RightIndex]->End < Nodes[smallest]->End){
-        smallest = RightIndex;
+    //if(RightIndex < n && Nodes[RightIndex]->End < Nodes[smallest]->End){
+    if(RightIndex < n && Nodes[RightIndex]->End > Nodes[largest]->End){
+        largest = RightIndex;
     }
 
-    if(smallest != i){
-        swap(Nodes[i]->Start, Nodes[smallest]->Start); 
-        swap(Nodes[i]->End, Nodes[smallest]->End);
-        swap(Nodes[i]->Value, Nodes[smallest]->Value); //swap all three data members together
-        Heapify(Nodes, n, smallest); //recursively heapify the affected subtree
+    if(largest != i){
+        swap(Nodes[i]->Start, Nodes[largest]->Start);
+        swap(Nodes[i]->End, Nodes[largest]->End);
+        swap(Nodes[i]->Value, Nodes[largest]->Value); //swap all three data members together
+        Heapify(Nodes, n, largest); //recursively heapify the affected subtree
     }
 
-} 
+}
 
 void FinalizeHeapTree(vector<ModifyPlacementNode*>& Nodes){ //this method builds upon the HeapTreeFromLinkedList method to ultimately transition the binary tree of heap nodes to a full on heap tree via heapify
 
@@ -298,10 +303,10 @@ void FinalizeHeapTree(vector<ModifyPlacementNode*>& Nodes){ //this method builds
     int LastParentNodeIndex = (n / 2) - 1; //the last parent node is the node that has the last child node, thus we can use the array convention to find the index of the last parent node by using this formula
 
     for(int i = LastParentNodeIndex; i >= 0; i--){ //we start from the last parent node and work our way up to the root node, thus we decrement the index of the parent node as we go up
-        Heapify(Nodes, n, i);    
+        Heapify(Nodes, n, i);
 
     }
-} 
+}
 
 //stage 2: Swap root node with the last node of the tree. Take root node out for sort. Heapify tree. Continue until there are no nodes left in the tree. The last node to stay is the root node
 CreateNode* SwapRootWithLastNode(vector<ModifyPlacementNode*>& Nodes, int n){
@@ -313,11 +318,11 @@ CreateNode* SwapRootWithLastNode(vector<ModifyPlacementNode*>& Nodes, int n){
         //swap the values between the root node and the last node, remember Size is the variable that represents the total number of nodes in the linked list of heap nodes, thus we -1 to get the last heap node to account for index counting
         swap(Nodes[0]->Start, Nodes[Size-1]->Start);
         swap(Nodes[0]->End, Nodes[Size-1]->End);
-        swap(Nodes[0]->Value, Nodes[Size-1]->Value); 
+        swap(Nodes[0]->Value, Nodes[Size-1]->Value);
 
         CreateNode* Taken = new CreateNode(Nodes[Size-1]->Start, Nodes[Size-1]->End, Nodes[Size-1]->Value); //we take the value of the last node now that it contains the value of the previous root node, which is the largest value in the heap tree, to ultimately create our sorted list
         Taken->LinkNext = SortedArray;
-        SortedArray = Taken; 
+        SortedArray = Taken;
 
         //heapify the tree because its not following regular heap structure
         Heapify(Nodes, Size-1, 0);
@@ -327,11 +332,11 @@ CreateNode* SwapRootWithLastNode(vector<ModifyPlacementNode*>& Nodes, int n){
     Last->LinkNext = SortedArray;
     SortedArray = Last;
     return SortedArray;
-} 
+}
 
 CreateNode* HeapSort(CreateNode* Input){ //THIS DOES THE ACTUAL SORTING FOR STAGE 2
 
-    vector<ModifyPlacementNode*>Nodes = HeapTreeFromLinkedList(Input); 
+    vector<ModifyPlacementNode*>Nodes = HeapTreeFromLinkedList(Input);
 
     FinalizeHeapTree(Nodes);
 
@@ -349,27 +354,27 @@ CreateNode* HeapSort(CreateNode* Input){ //THIS DOES THE ACTUAL SORTING FOR STAG
 
 /*
 
-Other notes about how this algorithm was implemented: 
+Other notes about how this algorithm was implemented:
 
 Heapsort is a Tranform and Conquer technqiue as it follows this two stage technique
 - stage 1 Transform: Construct a heap for the raw unsorted given input text file via the bottom up approach
-during this process sorting should and will be irrelevant. Reminder, a heap is a complete binary tree 
-where every parent node is >= to it's children, this is the def & property of a heap. 
+during this process sorting should and will be irrelevant. Reminder, a heap is a complete binary tree
+where every parent node is >= to it's children, this is the def & property of a heap.
 Thus, the largest verticie sits as the root node But how do we transform the given input and construct it into a heap?: We do so via a heapify process
 1. Place every vertex in the tree in the given order
 2. Start from the last parental node and make sure the def of the heap is followed, otherwise swap
-the vertex with it's largest child node and continue downaward until you no longer can. 
+the vertex with it's largest child node and continue downaward until you no longer can.
 3. Now do this with the previous parent node and the way till you've worked towards the root node.
 The process heapify is used above to construct the heap from the given input. Overall, heapify is an algorithm or a precedure to ensure that a tree remains as a heap tree
 
-keep in mind that we need to construct the heap into a link-list structre as the output of this problem requires the 
-the output of this problem requires it to be an adjancey list which is an array of a linked lists. 
+keep in mind that we need to construct the heap into a link-list structre as the output of this problem requires the
+the output of this problem requires it to be an adjancey list which is an array of a linked lists.
 
 - stage 2 Concquer: The process heapify used here is to ensure that the heap property is still followed for every time we take the previous root node out of the heap to output sorted data.
 In stage 2, we take the input that was transformed into a heap from stage 1 and finally begin to sort the heap by swapping the root node
 with the last element in the current form of the heap and then take the previous root node out of the heap. As a result,
 the heap may loose it's heap structure so we then heapify the tree to ensure that definition of a heap tree is still present. Remember,
-by the end of stage 1, while the nodes are placed in a way where the parent node is greater than it's child or children if any. 
+by the end of stage 1, while the nodes are placed in a way where the parent node is greater than it's child or children if any.
 
 
 */
