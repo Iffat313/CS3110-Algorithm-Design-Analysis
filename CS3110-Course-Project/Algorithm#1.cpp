@@ -36,11 +36,15 @@ using namespace std;
 struct CreateNode{  //this struct is used as a simple linked list to store our input data for simple traversal. We dont immediately create a heap node for each input data, just a simple node for it instead. again for simple traversal so that when we need to manipulate from it, its easier
 
     //data members
+    char Start;
+    char End;
     int Value; //data value of each node
     CreateNode* LinkNext; //stores the memory address of the next node, pointer usage
 
      //constructor
-     CreateNode(int Val){
+     CreateNode(char start, char end, int Val){
+        Start = start;
+        End = end;
         Value = Val;
         LinkNext = NULL; 
      }
@@ -55,14 +59,18 @@ You might ask, what is a heap node? A heap node must have the following three li
 
 */
     //data members
+    char Start;
+    char End;
     int Value;
     ModifyPlacementNode* LeftLink; //assuming currnode has a sibling
     ModifyPlacementNode* RightLink; //assuming currnode has a sibling
     ModifyPlacementNode* Parent;
 
     //constructor
-    ModifyPlacementNode(int Val){
-        int Value = Val;
+    ModifyPlacementNode(char start, char end, int Val){
+        Start = start;
+        End = end;
+        Value = Val;
         LeftLink = NULL;
         RightLink = NULL;
         Parent = NULL;
@@ -70,7 +78,7 @@ You might ask, what is a heap node? A heap node must have the following three li
 
 };
 
-void AddToLinkedList(CreateNode*& Head, int Val); //this method is used to add a node to a linked list by using the tools from the first struct
+void AddToLinkedList(CreateNode*& Head, char start, char end, int Val); //this method is used to add a node to a linked list by using the tools from the first struct
 
 vector<ModifyPlacementNode*> HeapTreeFromLinkedList(CreateNode* Head); //This method essentially executes the second struct to create a heap node for each node from the linked list of the struct creadnode, thus creating a binary tree and not a heap tree. This is due to the method not calling heapfiy
 
@@ -87,12 +95,36 @@ CreateNode* HeapSort(CreateNode* Input); //THIS DOES THE ACTUAL SORTING FOR STAG
 
 
 int main(){
-   
+
+    string Text;
+    int iterator = 1;
+    ifstream File("InputFP2.txt"); 
+    while(getline(File, Text)){
+
+        if(iterator == 1){
+            iterator++;
+            continue; //this puts us in the second line of the file where we can actually start to put our algorithm to use
+        }
+        
+
+       for(char &c: Text){ //remove the commas as we read the file line by line
+            if(c == ','){
+                c = ' ';
+            }
+        }
+
+
+
+
+
+
+    }
+
 
 }
 
-void AddToLinkedList(CreateNode*& head, int Val){ //this method is used to add a node to a linked list by using the tools from the first struct only. 
-    CreateNode* NewNode = new CreateNode(Val); //create a node by creating a pointer to the struct and invoke the paramterized constructor by passing respective argument
+void AddToLinkedList(CreateNode*& head, char start, char end, int Val){ //this method is used to add a node to a linked list by using the tools from the first struct only. 
+    CreateNode* NewNode = new CreateNode(start, end, Val); //create a node by creating a pointer to the struct and invoke the paramterized constructor by passing respective argument
 
     if(head==NULL){ //if head node doesnt exsist
         head = NewNode;
@@ -117,7 +149,7 @@ vector<ModifyPlacementNode*> HeapTreeFromLinkedList(CreateNode* Head){ //as the 
     //we create one heap node for every node from the linked list. So the linked list is what is intialized first for each inputted data?
     CreateNode* CurrentNode = Head;
     while(CurrentNode!=NULL){
-        Nodes.push_back(new ModifyPlacementNode(CurrentNode->Value));// we create a node under the struct ModifyPlacementNode
+        Nodes.push_back(new ModifyPlacementNode(CurrentNode->Start, CurrentNode->End, CurrentNode->Value));// we create a node under the struct ModifyPlacementNode
         CurrentNode = CurrentNode->LinkNext; //CurrentNode moves on to the next node in the linked list thanks to the link
     }
 
@@ -157,8 +189,9 @@ void Heapify(vector<ModifyPlacementNode*>& Nodes, int n, int i){ //this method i
     }
 
     if(largest != i){
-        swap(Nodes[i]->Value, Nodes[largest]->Value); //swap the value of the current node with the value of the largest node
-
+        swap(Nodes[i]->Start, Nodes[largest]->Start); 
+        swap(Nodes[i]->End, Nodes[largest]->End);
+        swap(Nodes[i]->Value, Nodes[largest]->Value); //swap the value of the current node with the value of the largest node 
         Heapify(Nodes, n, largest); //recursively heapify the affected subtree
     }
 
@@ -184,9 +217,11 @@ CreateNode* SwapRootWithLastNode(vector<ModifyPlacementNode*>& Nodes, int n){
     for(int Size = n; Size>1; Size--){
 
         //swap the values between the root node and the last node, remember Size is the variable that represents the total number of nodes in the linked list of heap nodes, thus we -1 to get the last heap node to account for index counting
+        swap(Nodes[0]->Start, Nodes[Size-1]->Start);
+        swap(Nodes[0]->End, Nodes[Size-1]->End);
         swap(Nodes[0]->Value, Nodes[Size-1]->Value); 
 
-        CreateNode* Taken = new CreateNode(Nodes[Size-1]->Value); //we take the value of the last node now that it contains the value of the previous root node, which is the largest value in the heap tree, to ultimately create our sorted list
+        CreateNode* Taken = new CreateNode(Nodes[Size-1]->Start, Nodes[Size-1]->End, Nodes[Size-1]->Value); //we take the value of the last node now that it contains the value of the previous root node, which is the largest value in the heap tree, to ultimately create our sorted list
         Taken->LinkNext = SortedArray;
         SortedArray = Taken; 
 
@@ -194,7 +229,7 @@ CreateNode* SwapRootWithLastNode(vector<ModifyPlacementNode*>& Nodes, int n){
         Heapify(Nodes, Size-1, 0);
     }
 
-    CreateNode* Last = new CreateNode(Nodes[0]->Value);
+    CreateNode* Last = new CreateNode(Nodes[0]->Start, Nodes[0]->End, Nodes[0]->Value);
     Last->LinkNext = SortedArray;
     SortedArray = Last;
     return SortedArray;
