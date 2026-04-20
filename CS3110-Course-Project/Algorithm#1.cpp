@@ -26,6 +26,7 @@ we conquer the original problem by solving the altered problem
 #include <sstream> //for istringstream object  to use iss(value) method from said object to read a specific word from a line within in a fil. This relies on getline(x,y) so it can break the word down within the line.
 #include <vector> //to use vectors
 #include <string> //so I can use certain built in methods for strings like getting the size
+#include <algorithm> //for sort()
 using namespace std;
 
 //heaps are follow the array convention. Thus, implementing it as a linked list means that we should implement it where there are left and right child pointers
@@ -95,32 +96,124 @@ CreateNode* HeapSort(CreateNode* Input); //THIS DOES THE ACTUAL SORTING FOR STAG
 
 
 int main(){
-
     string Text;
     int iterator = 1;
-    ifstream File("InputFP2.txt"); 
+    char start, end;
+    int value;
+    CreateNode* head = NULL;
+    
+    ifstream File("InputFP2.txt");
+    
+    if(!File){
+        cout << "cant open file" << endl;
+        return 1;
+    }
+    
     while(getline(File, Text)){
-
         if(iterator == 1){
             iterator++;
-            continue; //this puts us in the second line of the file where we can actually start to put our algorithm to use
+            continue;  
         }
         
-
-       for(char &c: Text){ //remove the commas as we read the file line by line
+        // get rid of commas
+        for(char &c: Text){
             if(c == ','){
                 c = ' ';
             }
         }
-
-
-
-
-
-
+        
+        // get the values from line
+        istringstream iss(Text);
+        iss >> start >> end >> value;
+        
+        // add to list
+        AddToLinkedList(head, start, end, value);
     }
-
-
+    
+    File.close();
+    
+       // sort it - sorts by End vertex alphabetically
+    CreateNode* sorted = HeapSort(head);
+    
+    // collect unique start vertices from the data
+    vector<char> uniqueStarts;
+    CreateNode* curr = sorted;
+    
+    while(curr){
+        bool found = false;
+        for(char c : uniqueStarts){
+            if(c == curr->Start){
+                found = true;
+                break;
+            }
+        }
+        if(!found){
+            uniqueStarts.push_back(curr->Start);
+        }
+        curr = curr->LinkNext;
+    }
+    
+    // sort the unique starts alphabetically
+    sort(uniqueStarts.begin(), uniqueStarts.end());
+    
+    // print output - grouped by start vertex, sorted by end vertex
+    cout << "list=" << endl;
+    for(char vertex : uniqueStarts){
+        bool first = true;
+        curr = sorted;
+        
+        while(curr){
+            if(curr->Start == vertex){
+                if(first){
+                    cout << vertex << " -> ";
+                    first = false;
+                } else {
+                    cout << " -> ";
+                }
+                cout << "(" << curr->End << ", " << curr->Value << ")";
+            }
+            curr = curr->LinkNext;
+        }
+        
+        if(!first){
+            cout << endl;
+        }
+    }
+    
+    // file output
+    ofstream out("Output.txt");
+    out << "list=" << endl;
+    for(char vertex : uniqueStarts){
+        bool first = true;
+        curr = sorted;
+        
+        while(curr){
+            if(curr->Start == vertex){
+                if(first){
+                    out << vertex << " -> ";
+                    first = false;
+                } else {
+                    out << " -> ";
+                }
+                out << "(" << curr->End << ", " << curr->Value << ")";
+            }
+            curr = curr->LinkNext;
+        }
+        
+        if(!first){
+            out << endl;
+        }
+    }
+    out.close();
+    
+    // cleanup memory
+    while(sorted){
+        CreateNode* temp = sorted;
+        sorted = sorted->LinkNext;
+        delete temp;
+    }
+    
+    return 0;
 }
 
 void AddToLinkedList(CreateNode*& head, char start, char end, int Val){ //this method is used to add a node to a linked list by using the tools from the first struct only. 
@@ -176,23 +269,24 @@ vector<ModifyPlacementNode*> HeapTreeFromLinkedList(CreateNode* Head){ //as the 
 }
 
 void Heapify(vector<ModifyPlacementNode*>& Nodes, int n, int i){ //this method is used to heapify the tree by ensuring that the definition of a heap is followed. This is used in both stage 1 and stage 2
-    int largest = i;
+    int smallest = i;  //changed from largest to smallest since we're sorting ascending by End letter
     int LeftIndex = 2 * i + 1;
     int RightIndex = 2 * i + 2;
 
-    if(LeftIndex < n && Nodes[LeftIndex]->Value > Nodes[largest]->Value){
-        largest = LeftIndex;
+    //compare by End letter (A to Z) instead of Value
+    if(LeftIndex < n && Nodes[LeftIndex]->End < Nodes[smallest]->End){
+        smallest = LeftIndex;
     }
 
-    if(RightIndex < n && Nodes[RightIndex]->Value > Nodes[largest]->Value){
-        largest = RightIndex;
+    if(RightIndex < n && Nodes[RightIndex]->End < Nodes[smallest]->End){
+        smallest = RightIndex;
     }
 
-    if(largest != i){
-        swap(Nodes[i]->Start, Nodes[largest]->Start); 
-        swap(Nodes[i]->End, Nodes[largest]->End);
-        swap(Nodes[i]->Value, Nodes[largest]->Value); //swap the value of the current node with the value of the largest node 
-        Heapify(Nodes, n, largest); //recursively heapify the affected subtree
+    if(smallest != i){
+        swap(Nodes[i]->Start, Nodes[smallest]->Start); 
+        swap(Nodes[i]->End, Nodes[smallest]->End);
+        swap(Nodes[i]->Value, Nodes[smallest]->Value); //swap all three data members together
+        Heapify(Nodes, n, smallest); //recursively heapify the affected subtree
     }
 
 } 
